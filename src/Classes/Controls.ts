@@ -17,6 +17,7 @@ type Subscribers<T extends object> = {
 
 export class State {
     public subscribableStates = {
+        TEXT_INPUT: 'Jaav',
         MIN_DIST: 1.9,
         DENSITY: 200,
         BG_COLOR: '#FFFFFF',
@@ -32,6 +33,12 @@ export class State {
     public FnStates ={
         loadFile : function() { 
             const button = document.getElementById('imagePicker')
+            if(button){
+                button.click()
+            }
+        },
+        insertText : function() {
+            const button = document.getElementById('submitBtn')
             if(button){
                 button.click()
             }
@@ -78,10 +85,12 @@ export class State {
                         const Rindex = (Math.round(point[0]) + Math.round(point[1]) * imgeData.width) * 4
                         const Gindex = ((Math.round(point[0]) + Math.round(point[1]) * imgeData.width) * 4) + 1
                         const Bindex = ((Math.round(point[0]) + Math.round(point[1]) * imgeData.width) * 4) + 2
+                        const Aindex = ((Math.round(point[0]) + Math.round(point[1]) * imgeData.width) * 4) + 3
                         const color = new Color(
                             imgeData.data[Rindex],
                             imgeData.data[Gindex],
-                            imgeData.data[Bindex]
+                            imgeData.data[Bindex], 
+                            imgeData.data[Aindex]
                         )
                         // map the value to 0-1 and apply Math.pow for flavor
                         return Math.pow(color.getGrayScale() / this.subscribableStates.DENSITY, 2.7)
@@ -100,10 +109,11 @@ export class State {
                     const pixel = new Pixel(
                         point[0],
                         point[1],
+                        new Color(
                         imgeData.data[Rindex],
                         imgeData.data[Gindex],
                         imgeData.data[Bindex],
-                        imgeData.data[Aindex]
+                        imgeData.data[Aindex])
                     )
                     const particle = new Particle(
                         this.subscribableStates.SIZE,
@@ -141,21 +151,26 @@ export class State {
     private subscribers:Subscribers<State['subscribableStates']>  = Object.keys(this.subscribableStates).reduce((acc, key) => ({...acc, [key]: []}), {}) as Subscribers<State['subscribableStates']>
     private img: HTMLImageElement | null = null
     constructor(){
+        this.gui.add(this.subscribableStates, 'TEXT_INPUT').onChange(() => this.notify('TEXT_INPUT')).name('Text Input');
+        this.gui.add(this.FnStates, 'InsertText').name('Insert Text')
         this.gui.add(this.FnStates, 'loadFile').name('Upload Your Image')
         this.gui.add(this.subscribableStates, 'COLOR', ['black', 'invert', 'original', 'grayscale', 'custom']).onChange(() => this.notify('COLOR')).name('Dot Color')
         this.gui.addColor(this.subscribableStates, 'BG_COLOR').onChange(() => this.notify('BG_COLOR')).name('Background Color')
         this.gui.addColor(this.subscribableStates, 'DOT_COLOR').onChange(() => this.notify('DOT_COLOR')).name('Dots Custom Color')
-        this.gui.add(this.subscribableStates, 'SIZE', 0,100, 0.5).onChange( () => this.notify('SIZE')).name('Dot Size')
+        this.gui.add(this.subscribableStates, 'SIZE', 1,25, 0.1).onChange( () => this.notify('SIZE')).name('Dot Size')
         // this.gui.add(this.subscribableStates, "DENSITY", 180 , 300, 20).onChange( () => this.notify()).name("Density")
-        this.gui.add(this.subscribableStates, 'MIN_DIST', 1.5 , 150, 0.2).onChange( () => this.notify('MIN_DIST')).name('Density') 
+        this.gui.add(this.subscribableStates, 'MIN_DIST', 0.5 , 10, 0.2).onChange( () => this.notify('MIN_DIST')).name('Density') 
         this.gui.add(this.subscribableStates, 'INTERACTION').onChange( () => this.notify('INTERACTION')).name('Interactive') 
         this.gui.add(this.subscribableStates, 'UNEASY').onChange( () => this.notify('UNEASY')) .name('Uneaze')
         this.gui.add(this.subscribableStates, 'UNEAZYRANGE', 1 , 10, 1).onChange( () => this.notify('UNEAZYRANGE')).name('Un Eeazy range')
         this.gui.add(this.subscribableStates, 'MOVE_HORIZENTAL', 0 , 5000, 1).onChange( () => this.notify('MOVE_HORIZENTAL')).name('Move Horizental') 
         this.gui.add(this.subscribableStates, 'MOVE_VERTICAL', 0 , 5000, 1).onChange( () => this.notify('MOVE_VERTICAL')).name('Move Vertical') 
         this.gui.add(this.FnStates, 'exportToJPG').name('Export to JPG')
+
+        
   
     }
+    
 
     subscribe(
         FN: (state: typeof this.subscribableStates) => void,

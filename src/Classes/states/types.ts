@@ -47,6 +47,7 @@ export class ColorBGDrawer extends BGDrawer{
 
 
 export abstract class  IAppState {
+    protected inputText: string = ''
     abstract bgDrawer: BGDrawer
     protected colorMode: ColorState = new OriginalColorState()
     constructor(
@@ -57,6 +58,10 @@ export abstract class  IAppState {
     ){}
     abstract draw(): void
     abstract setParticleRadius(r: number): void
+
+    setTextInput(text: string) {
+        this.inputText = text
+    }
 
     setBGDrawer = (drawer: BGDrawer) =>{
         this.bgDrawer = drawer

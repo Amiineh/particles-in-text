@@ -19,3 +19,30 @@ canvas {
 #imagePicker {
   display: none;
 }
+
+#submitBtn {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translate(-50%, 0);
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #fff;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  color: #000;
+  cursor: pointer;
+}
+
+#text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Roboto', sans-serif;
+  font-size: 2rem;
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 0 10px #000;
+}

@@ -16,6 +16,7 @@ import { StateManager } from './Classes/StateManager'
 import { DatGuiStateNotifier } from './Classes/StateNotifier/DatGUIStateManager'
 
 const initialState = {
+    TEXT_INPUT: '',
     MIN_DIST: 1.9,
     DENSITY: 1.9,
     BG_COLOR: '#FFFFFF',
@@ -158,9 +159,11 @@ export type AppState = typeof initialState
 // }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // const canvas = document.querySelector<HTMLCanvasElement>('#canvas')
+    // const text = document.querySelector<HTMLDivElement>('#text')
     const uploadBTN = document.querySelector<HTMLInputElement>('#imagePicker')
+    const submitBtn = document.querySelector<HTMLButtonElement>('#submitBtn')
 
-    
     const app = new App('#app')
     const actions = {
         loadFile : () => {
@@ -176,9 +179,17 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         exportSVG: () => {
             app.exportSVG()
-        }
+        },
+
+        InsertText: () => {
+            if(submitBtn){
+                submitBtn.click()
+            }
+        },
     }
     const stateManager = new StateManager(initialState)
+    
+    stateManager.subscribe(app.setTextInput, 'TEXT_INPUT')
     stateManager.subscribe(app.setParticleRadius, 'SIZE')
     stateManager.subscribe(app.setCanvasBG, 'BG_COLOR')
     stateManager.subscribe(app.setParticleDensity, 'DENSITY')
@@ -196,6 +207,9 @@ document.addEventListener('DOMContentLoaded', () => {
     datGUIStateNotifier.init()
 
     app.init()
+
+    // const textInput = document.querySelector<HTMLInputElement>('#textInput')
+
     const reader = new FileReader()
     reader.onload = function (event) {
         const target = event.target 
@@ -207,14 +221,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if(uploadBTN){
         uploadBTN.onchange = function(e){
+            // console.log('uploadBTNpushed')
             e.preventDefault()
             const target = e.target as HTMLInputElement
-            if(!target){
-                return
-            }
-            if(!target.files){
-                return
-            }
+            if(!target || !target.files) return
             const file = target.files[0]
             if (file) {
                 reader.readAsDataURL(file)
@@ -222,5 +232,59 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    if(submitBtn){
+        // console.log('submitBtn')
+        submitBtn.onclick = function(e){
+            // console.log('submitBtn clicked')
+
+            e.preventDefault()
+            if(stateManager.state.TEXT_INPUT){
+                // console.log(stateManager.state.TEXT_INPUT)
+                
+                app.goToTextInsertedState(stateManager.state)
+            }
+        }
+    }
+
 })
+
+// document.addEventListener('DOMContentLoaded', () => {
+
+//     const submitBtn = document.querySelector<HTMLButtonElement>('#submitBtn')
+
+//     const app = new App('#app2')
+
+//     const actions = {
+//         InsertText: () => {
+//             if(submitBtn){
+//                 submitBtn.click()
+//             }
+//         },
+//     }
+
+//     const stateManager = new StateManager(initialState)
+    
+//     stateManager.subscribe(app.setTextInput, 'TEXT_INPUT')
+
+//     const datGUIStateNotifier = new DatGuiStateNotifier(
+//         stateManager,
+//         actions
+//     )
+
+//     datGUIStateNotifier.init()
+
+//     app.init()
+
+//     const textInput = document.querySelector<HTMLInputElement>('#textInput')
+
+//     if(submitBtn){
+//         console.log('submitBtn')
+//         submitBtn.onclick = function(e){
+//             e.preventDefault()
+//             if(textInput){
+//                 app.goToTextInsertedState(stateManager.state)
+//             }
+//         }
+//     }
+// })
 
