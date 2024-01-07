@@ -24,6 +24,7 @@ export class State {
         DOT_COLOR: '#000000',
         COLOR: 'original' as COLORS,
         SIZE: 1,
+        FONT_SIZE: 100,
         UNEAZYRANGE: 2,
         INTERACTION: false,
         UNEASY: false,
@@ -153,6 +154,7 @@ export class State {
     constructor(){
         this.gui.add(this.subscribableStates, 'TEXT_INPUT').onChange(() => this.notify('TEXT_INPUT')).name('Text Input');
         this.gui.add(this.FnStates, 'InsertText').name('Insert Text')
+        this.gui.add(this.subscribableStates, 'FONT_SIZE', 50, 200, 5).onChange(() => this.notify('FONT_SIZE')).name('Font Size')
         this.gui.add(this.FnStates, 'loadFile').name('Upload Your Image')
         this.gui.add(this.subscribableStates, 'COLOR', ['black', 'invert', 'original', 'grayscale', 'custom']).onChange(() => this.notify('COLOR')).name('Dot Color')
         this.gui.addColor(this.subscribableStates, 'BG_COLOR').onChange(() => this.notify('BG_COLOR')).name('Background Color')

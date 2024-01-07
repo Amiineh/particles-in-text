@@ -126,8 +126,8 @@ const colorModeFactory = (state: AppState) => {
 class IMGUtils {
     private constructor(){}
 
-    static drawText(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, text: string, callback: () => void){
-        const img = this.createTextImage(text)
+    static drawText(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, text: string, state: AppState, callback: () => void){
+        const img = this.createTextImage(text, state)
         img.onload = function () {
             const scale = img.width / img.height
 
@@ -143,7 +143,7 @@ class IMGUtils {
 
             canvas.width = img.width
             canvas.height = img.height
-
+            
             ctx.drawImage(
                 img, 
                 0,
@@ -157,7 +157,6 @@ class IMGUtils {
 
 
     static drawImg(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, url: string, callback: () => void){
-        console.log("drawImg")
         const img = new Image()
         img.src = url
         img.onload = function () {
@@ -187,17 +186,16 @@ class IMGUtils {
         }
     }
 
-    static createTextImage(text: string): HTMLImageElement {
+    static createTextImage(text: string, state:AppState): HTMLImageElement {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         if (!ctx) {
             throw new Error('Context not supported');
         }
 
-        ctx.font = '100px Arial';
-        const textWidth = ctx.measureText(text).width;
+        const textWidth = ctx.measureText(text).width * (state['FONT_SIZE'] / 10);
         const canvasWidth = textWidth + 20; // Add some padding
-        const canvasHeight = 120; // Set the canvas height
+        const canvasHeight = 140 + state['FONT_SIZE'] /10 ; // Set the canvas height
 
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
@@ -206,7 +204,17 @@ class IMGUtils {
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.font = '100px Arial';
+        // Load the font using @font-face rule
+        const fontFile = 'XXAAVV83-Bold.ttf'
+        const fontSize = String(state['FONT_SIZE']) + 'px'
+        console.log(state['FONT_SIZE'])
+        const fontFace = new FontFace('CustomFont', `url(${fontFile})`);
+        fontFace.load().then(() => {
+            document.fonts.add(fontFace);
+        })
+            
+        ctx.font = fontSize + ' CustomFont';
+        
         ctx.fillStyle = 'black';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -216,32 +224,39 @@ class IMGUtils {
         img.src = canvas.toDataURL();
 
         // // Append the image element to the body
-        // document.body.appendChild(img);
+        // // document.body.appendChild(img);
+        // const parentElem = document.body;
+        // const oldImg = parentElem.querySelector('img');
+        // if (oldImg) {
+        //     parentElem.replaceChild(img, oldImg);
+        // } else {
+        //     parentElem.appendChild(img);
+        // }
 
         return img;
     }
 
-    static createTextImageData(text: string): ImageData {
-        const img = this.createTextImage(text);
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-            throw new Error('Context not supported');
-        }
+    // static createTextImageData(text: string, state: AppState): ImageData {
+    //     const img = this.createTextImage(text, state);
+    //     const canvas = document.createElement('canvas');
+    //     const ctx = canvas.getContext('2d');
+    //     if (!ctx) {
+    //         throw new Error('Context not supported');
+    //     }
 
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
+    //     canvas.width = img.width;
+    //     canvas.height = img.height;
+    //     ctx.drawImage(img, 0, 0);
 
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        return imageData;
-    }
+    //     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    //     return imageData;
+    // }
 
     static converImageDataToParticles(imageData:ImageData, state: AppState){
         const pds = new PoissonDiskSampling({
             shape: [imageData.width, imageData.height],
             minDistance: state['DENSITY'],
-            maxDistance: 55,
+            maxDistance: 10,
             tries: 10,
             distanceFunction: function (point: any) {
                 // get the index of the red pixel value for the given coordinates (point)
@@ -347,13 +362,12 @@ export class App {
         // bigTextElement.textContent = textInput;
         // this.containerElem.appendChild(bigTextElement);
 
-        console.log("goToTextInsertedState")
+        // console.log("goToTextInsertedState")
         
         const cb = () => {
-            console.log("cb")
-            const imageData = IMGUtils.createTextImageData(textInput)
+            const imageData = this.getImageData() 
+            // const imageData = IMGUtils.createTextImageData(textInput)
             const particles = IMGUtils.converImageDataToParticles(imageData, state)
-            console.log(particles); // Print particles in the log
             this.state = new TextInsertedState(
                 this.ctx,
                 this.canvas,
@@ -366,8 +380,7 @@ export class App {
             this.state.draw()
         }
 
-    
-        IMGUtils.drawText(this.ctx, this.canvas, textInput, cb)
+        IMGUtils.drawText(this.ctx, this.canvas, textInput, state, cb)
     }
 
     goToImageUploadedState = (url: string, state:AppState) =>{
@@ -391,26 +404,17 @@ export class App {
     }
 
     setParticleDensity = (state: AppState) => {
-        if(this.url){
-            this.clearCanvas()
-            const cb = () => {
-                const imageData = this.getImageData()
-                const particles = IMGUtils.converImageDataToParticles(imageData, state)
-                this.state = new ImageUploadedState(
-                    this.ctx, 
-                    this.canvas, 
-                    particles,
-                    new JPEGExportStrategy()
-                )
-                const mode = colorModeFactory(state)
-                this.state.setColorMode(mode)
-                this.clearCanvas()
-                this.state.draw()
-            }
-            
-            IMGUtils.drawImg(this.ctx, this.canvas, this.url, cb)
-        }
+        this.clearCanvas()
+        if(this.url)
+            this.goToImageUploadedState(this.url, state)
 
+        else
+            this.goToTextInsertedState(state)
+    }
+
+    setFontSize = (state: AppState) => {
+        this.clearCanvas()
+        this.goToTextInsertedState(state)
     }
 
     setTextInput = (state: AppState) => {

@@ -23,6 +23,7 @@ const initialState = {
     DOT_COLOR: '#000000',
     COLOR: 'original' as COLORS,
     SIZE: 1,
+    FONT_SIZE: 100,
     UNEAZYRANGE: 2,
     INTERACTION: false,
     UNEASY: false,
@@ -191,6 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     stateManager.subscribe(app.setTextInput, 'TEXT_INPUT')
     stateManager.subscribe(app.setParticleRadius, 'SIZE')
+    stateManager.subscribe(app.setFontSize, 'FONT_SIZE')
     stateManager.subscribe(app.setCanvasBG, 'BG_COLOR')
     stateManager.subscribe(app.setParticleDensity, 'DENSITY')
     stateManager.subscribe(app.setVerticalDeformity, 'MOVE_VERTICAL')
