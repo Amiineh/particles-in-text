@@ -9,6 +9,9 @@ export class DatGuiStateNotifier extends StateNotifier {
         this.gui.add(this.stateManager.state, 'TEXT_INPUT').onChange((text: string) => this.stateManager.set('TEXT_INPUT', text)).name('Text')
         this.gui.add(this.actions, 'InsertText').name('Insert Text')
         this.gui.add(this.stateManager.state, 'FONT_SIZE', 50, 200, 5).onChange( (font_size: number) => this.stateManager.set('FONT_SIZE', font_size)).name('Font Size')
+        this.gui.add(this.actions, 'generateMap').name('Generate Map')
+        this.gui.add(this.stateManager.state, 'MAP_SCALE', 0.001, 0.01, 0.0001).onChange( (map_scale: number) => this.stateManager.set('MAP_SCALE', map_scale)).name('Map Scale')
+        this.gui.add(this.stateManager.state, 'MAP_STRENGTH', 0, 1, 0.1).onChange( (map_strength: number) => this.stateManager.set('MAP_STRENGTH', map_strength)).name('Map Strength')
         this.gui.add(this.actions, 'loadFile').name('Upload Your Image')
         this.gui.add(this.stateManager.state, 'COLOR', ['black', 'invert', 'original', 'grayscale', 'custom']).onChange(
             (value: COLORS) => this.stateManager.set('COLOR', value)

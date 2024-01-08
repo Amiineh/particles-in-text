@@ -14,6 +14,9 @@ import { InitialState } from './states/InitialState'
 import { ColorBGDrawer, IAppState } from './states/types'
 // @ts-ignore
 import PoissonDiskSampling from 'poisson-disk-sampling'
+import { generatePerlinNoise } from 'perlin-noise';
+// import p5 from 'p5';
+import { createNoise2D } from 'simplex-noise';
 
 // type drawFNType = (time: number,context: CanvasRenderingContext2D, canvas: HTMLCanvasElement,data:interactiveData )=>void
 // type initFNType = (context: CanvasRenderingContext2D, canvas: HTMLCanvasElement, app: App)=>void
@@ -403,6 +406,150 @@ export class App {
         IMGUtils.drawImg(this.ctx, this.canvas, url, cb)
     }
 
+    goToMapState = (state: AppState) => {
+        // this.generateMap(state)
+        const imgData = this.generateMap(state)
+        const particles = IMGUtils.converImageDataToParticles(imgData, state)
+        this.state = new ImageUploadedState(
+            this.ctx,
+            this.canvas, 
+            particles,
+            new JPEGExportStrategy()
+        )
+        const mode = colorModeFactory(state)
+        this.state.setColorMode(mode)
+        this.clearCanvas()
+        this.state.draw()
+        
+        
+    }
+
+    
+
+    generateMap = (state: AppState) => {
+
+        function scale (number:number, inMin: number, inMax:number, outMin:number, outMax:number) :number{
+            return (number - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+        }
+        
+        const SEED = 0;
+        const WIDTH = 512;
+        const HEIGHT = 512;
+        const FREQUENCY = state.MAP_SCALE;
+                // const scale = state.MAP_SCALE; // Smaller for more detail
+        const strength = state.MAP_STRENGTH; 
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Unable to get canvas context');
+
+        // Set canvas size
+        canvas.width = 500;
+        canvas.height = 500;
+        // document.body.appendChild(canvas);
+
+        // // // Adjust these parameters to control the output
+        // // const scale = state.MAP_SCALE; // Smaller for more detail
+        // // const seed = Math.random(); // Change seed for different patterns
+
+        // // Generating scaled noise
+        // const noise = generatePerlinNoise(canvas.width, canvas.height, { scale, seed });
+        console.log("generateMap")
+        const noise2D = createNoise2D();
+        // Draw the image
+        for (let x = 0; x < canvas.width; x++) {
+            for (let y = 0; y < canvas.height; y++) {
+                const noiseValue = noise2D(x * FREQUENCY, y * FREQUENCY);
+                // Modify color mapping here
+                const color = scale(Math.floor(noiseValue * 255), 0, 255, 255, 0);
+                
+                // const color = 0x010101 * Math.floor((noiseValue + 1) * 127.5);
+                ctx.fillStyle = `rgb(${color}, ${color}, ${color})`;
+                ctx.fillRect(x, y, 1, 1);
+            }
+        }
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        return imgData;
+
+        // // Create a canvas and get its context
+        // const scale = state.MAP_SCALE; // Smaller for more detail
+        // const strength = state.MAP_STRENGTH; 
+        // const seed = Math.random(); // Change seed for different patterns
+
+        // const sketch = (p: p5) => {
+        //     p.setup = () => {
+        //         p.createCanvas(800, 600);
+        //         p.noLoop();
+        //         p.noiseSeed(seed);
+        //     };
+        
+        //     p.draw = () => {
+        //         p.loadPixels();
+        //         for (let x = 0; x < p.width; x++) {
+        //             for (let y = 0; y < p.height; y++) {
+        //                 // Using Perlin noise to get a value between 0 and 1
+        //                 p.noiseDetail(1);
+        //                 let noiseVal = p.noise(x * scale, y * scale);
+        //                 noiseVal = p.max(0, noiseVal - strength)
+        //                 noiseVal /= (1 - strength)
+        //                 let col = noiseVal * 255;
+        //                 let index = (x + y * p.width) * 4;
+        //                 p.pixels[index] = col; // Red
+        //                 p.pixels[index + 1] = col; // Green
+        //                 p.pixels[index + 2] = col; // Blue
+        //                 p.pixels[index + 3] = 255; // Alpha
+        //             }
+        //         }
+        //         p.updatePixels();
+        //     };
+
+        //     // Function to extract ImageData from the canvas
+        //     p.getImageDataFromCanvas = () => {
+        //         // Use get() to capture the entire canvas as a p5.Image
+        //         let img = p.get();
+        //         img.loadPixels();
+        //         // Access the image's pixel array
+        //         let d = img.pixels;
+        //         // Now, d is a 1D array containing the rgba values of each pixel
+        //         // To convert this into an ImageData object:
+        //         let imageData = new ImageData(new Uint8ClampedArray(d), p.width, p.height);
+        //         return imageData;
+        //     };
+        // };
+
+        
+        // new p5(sketch);
+        // p5.redraw();
+        // return p5.getImageDataFromCanvas();
+        
+        // const canvas = document.createElement('canvas');
+        // const ctx = canvas.getContext('2d');
+        // if (!ctx) throw new Error('Unable to get canvas context');
+
+        // // Set canvas size
+        // canvas.width = 500;
+        // canvas.height = 500;
+        // document.body.appendChild(canvas);
+
+        // // // Adjust these parameters to control the output
+        // // const scale = state.MAP_SCALE; // Smaller for more detail
+        // // const seed = Math.random(); // Change seed for different patterns
+
+        // // Generating scaled noise
+        // const noise = generatePerlinNoise(canvas.width, canvas.height, { scale, seed });
+
+        // // Draw the image
+        // for (let x = 0; x < canvas.width; x++) {
+        //     for (let y = 0; y < canvas.height; y++) {
+        //         const noiseValue = noise[x + y * canvas.width];
+        //         // Modify color mapping here
+        //         const color = Math.floor(noiseValue * 255);
+        //         ctx.fillStyle = `rgb(${color}, ${color}, ${color})`;
+        //         ctx.fillRect(x, y, 1, 1);
+        //     }
+        // }
+    }
+
     setParticleDensity = (state: AppState) => {
         this.clearCanvas()
         if(this.url)
@@ -421,6 +568,16 @@ export class App {
         this.state.setTextInput(state['TEXT_INPUT'])
         this.clearCanvas()
         this.state.draw()
+    }
+
+    setMapScale = (state: AppState) => {
+        this.clearCanvas()
+        this.goToMapState(state)
+    }
+
+    setMapStrength = (state: AppState) => {
+        this.clearCanvas()
+        this.goToMapState(state)
     }
 
     setParticleRadius = (state: AppState) => {
@@ -479,3 +636,4 @@ export class App {
     }
 
 }
+

@@ -62,7 +62,7 @@ export abstract class  IAppState {
     setTextInput(text: string) {
         this.inputText = text
     }
-
+    
     setBGDrawer = (drawer: BGDrawer) =>{
         this.bgDrawer = drawer
     }

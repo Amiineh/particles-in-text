@@ -17,6 +17,8 @@ import { DatGuiStateNotifier } from './Classes/StateNotifier/DatGUIStateManager'
 
 const initialState = {
     TEXT_INPUT: '',
+    MAP_SCALE: 0.005,
+    MAP_STRENGTH: 0.1,
     MIN_DIST: 1.9,
     DENSITY: 1.9,
     BG_COLOR: '#FFFFFF',
@@ -163,8 +165,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // const canvas = document.querySelector<HTMLCanvasElement>('#canvas')
     // const text = document.querySelector<HTMLDivElement>('#text')
     const uploadBTN = document.querySelector<HTMLInputElement>('#imagePicker')
-    const submitBtn = document.querySelector<HTMLButtonElement>('#submitBtn')
-
+    // const submitBtn = document.querySelector<HTMLButtonElement>('#submitBtn')
+    // const mapBtn = document.querySelector<HTMLButtonElement>('#mapBtn')
+    const submitBtn = document.getElementById('submitBtn')
+    const mapBtn = document.getElementById('mapBtn')
+    
     const app = new App('#app')
     const actions = {
         loadFile : () => {
@@ -187,10 +192,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.click()
             }
         },
+
+        generateMap: () => {
+            if(mapBtn){
+                mapBtn.click()
+            }
+        }
     }
     const stateManager = new StateManager(initialState)
     
     stateManager.subscribe(app.setTextInput, 'TEXT_INPUT')
+    stateManager.subscribe(app.setMapScale, 'MAP_SCALE')
+    stateManager.subscribe(app.setMapStrength, 'MAP_STRENGTH')
     stateManager.subscribe(app.setParticleRadius, 'SIZE')
     stateManager.subscribe(app.setFontSize, 'FONT_SIZE')
     stateManager.subscribe(app.setCanvasBG, 'BG_COLOR')
@@ -245,6 +258,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 app.goToTextInsertedState(stateManager.state)
             }
+        }
+    }
+
+    if(mapBtn){
+        mapBtn.onclick = function(e){
+            e.preventDefault()
+            app.goToMapState(stateManager.state)
         }
     }
 
