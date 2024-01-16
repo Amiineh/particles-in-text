@@ -15,7 +15,8 @@ import { ColorBGDrawer, IAppState } from './states/types'
 // @ts-ignore
 import PoissonDiskSampling from 'poisson-disk-sampling'
 import { generatePerlinNoise } from 'perlin-noise';
-// import p5 from 'p5';
+import p5 from 'p5';
+import { sketch_mulholland } from './mulholland';
 import { createNoise2D } from 'simplex-noise';
 
 // type drawFNType = (time: number,context: CanvasRenderingContext2D, canvas: HTMLCanvasElement,data:interactiveData )=>void
@@ -407,19 +408,22 @@ export class App {
     }
 
     goToMapState = (state: AppState) => {
-        // this.generateMap(state)
-        const imgData = this.generateMap(state)
-        const particles = IMGUtils.converImageDataToParticles(imgData, state)
-        this.state = new ImageUploadedState(
-            this.ctx,
-            this.canvas, 
-            particles,
-            new JPEGExportStrategy()
-        )
-        const mode = colorModeFactory(state)
-        this.state.setColorMode(mode)
-        this.clearCanvas()
-        this.state.draw()
+
+        new p5(sketch_mulholland);
+        
+        // // this works, uncomment to get back to it!
+        // const imgData = this.generateMap(state)
+        // const particles = IMGUtils.converImageDataToParticles(imgData, state)
+        // this.state = new ImageUploadedState(
+        //     this.ctx,
+        //     this.canvas, 
+        //     particles,
+        //     new JPEGExportStrategy()
+        // )
+        // const mode = colorModeFactory(state)
+        // this.state.setColorMode(mode)
+        // this.clearCanvas()
+        // this.state.draw()
         
         
     }
