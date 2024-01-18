@@ -16,7 +16,7 @@ import { ColorBGDrawer, IAppState } from './states/types'
 import PoissonDiskSampling from 'poisson-disk-sampling'
 import { generatePerlinNoise } from 'perlin-noise';
 import p5 from 'p5';
-import { sketch_mulholland } from './mulholland';
+import { MulhollandSketchManager } from './mulholland';
 import { createNoise2D } from 'simplex-noise';
 
 // type drawFNType = (time: number,context: CanvasRenderingContext2D, canvas: HTMLCanvasElement,data:interactiveData )=>void
@@ -406,10 +406,20 @@ export class App {
 
         IMGUtils.drawImg(this.ctx, this.canvas, url, cb)
     }
+    
+    // create a new sketch manager
+    private sketch_manager = new MulhollandSketchManager()
+
 
     goToMapState = (state: AppState) => {
+        
+        // create a new sketch closure with parameters of the state
+        const sketch_closure = this.sketch_manager.createSketch(state)
+        // create a new p5 sketch with the closure
+        this.sketch_manager.initSketch(sketch_closure)
 
-        new p5(sketch_mulholland);
+        // // this creates a new canvas at each generate, so the canvasas are layered on top of each other
+        // new p5(sketch_mulholland);
         
         // // this works, uncomment to get back to it!
         // const imgData = this.generateMap(state)

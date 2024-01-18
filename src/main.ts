@@ -17,8 +17,8 @@ import { DatGuiStateNotifier } from './Classes/StateNotifier/DatGUIStateManager'
 
 const initialState = {
     TEXT_INPUT: '',
-    MAP_SCALE: 0.005,
-    MAP_STRENGTH: 0.1,
+    MAP_SCALE: 0.006,
+    MAP_STRENGTH: 5,
     MIN_DIST: 1.9,
     DENSITY: 1.9,
     BG_COLOR: '#FFFFFF',
